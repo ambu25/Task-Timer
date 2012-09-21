@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Task Timer | With Pomodoro Technique Support</title>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+		<meta name="robots" content="index, follow">
+		<meta name="reply-to" content="lucas.brigida@ymail.com">
+		<meta name="author" content="Lucas Pereira Brígida">
+		<meta name="keywords" content="pomodoro, pomodoro technique, timer, counter, task timer">
+
+		<link rel="icon" href="/images/pomodoro.png" type="image/x-png">
+
+		<style type="text/css">
+
+			.icon-pomodoro{
+				background: url(/images/pomodoro.png);
+				padding-left: 20px;
+				background-size: 20px;
+				padding-bottom: 3.8px;
+				margin-right: 3px;
+			}
+
+			button[value="pomodoro"]{
+				padding: 8px;
+			}
+
+			body{
+				background: url("/images/bg04.png");
+				color: white;
+			}
+
+			.timer {
+				//margin-top: 2%;
+				margin-left: 15%;
+				margin-right: 15%;
+
+				border-color: white;
+				border-style: solid;
+
+				padding-bottom: 40px;
+			}		
+
+			.timer .clock {
+				list-style: none;
+				padding: 0px;
+				text-align: center;
+			}
+			.clock li{
+				display: inline-block;
+				width: 60px;
+			}
+
+
+			.timer .timer-buttons{
+				list-style: none;
+				padding: 0px;
+				text-align: center;
+			}
+
+			.timer-buttons li{
+				display: inline-block;
+			}
+
+			.timer-buttons .btn{
+				height:30px;
+				width: 100px;
+			}
+
+			.timer .timer-options{
+				list-style: none;
+				padding: 0px;
+				text-align: center;
+			}
+
+			.timer-options li {
+				display: inline-block;	
+			}
+
+			.timer .timer-pomodoros{
+				list-style: none;
+				padding: 0px;
+				margin: 0px 0px 0px 0px;
+				visibility: hidden;
+			}
+
+
+			.timer-pomodoros li{
+				display: inline-block;	
+			}
+
+			.title{
+				margin-top: 8%;
+			}
+			
+		</style>
+		<script type="text/javascript" src="/javascripts/countdown.js"></script>
+	</head>
+	<body>
+		<div class="title"><center><h1>Task Timer</h1></center></div>
+		<div class="timer">
+			
+			<ul class="timer-pomodoros">
+				<li><i class="icon-pomodoro"></i></li>
+				<li><span id="pomodoro-counter">0 pomodoro(s).</span></li>
+			</ul>				
+			
+			<ul class="clock">
+				<li><span class="timer-unit timer-hours"><h1 id="hours">0 :</h1>hours</span></li>
+				<li><span class="timer-unit timer-minutes"><h1 id="minutes">0 :</h1>minutes</span></li>
+				<li><span class="timer-unit timer-seconds"><h1 id="seconds">0</h1>seconds</span></li>
+			</ul>
+			<ul class="timer-buttons">
+				<li><button id="start-btn" class="btn" onclick="startTimer();">Start</button></li>
+				<li><button id="pause-btn" class="btn" onclick="pauseTimer();" disabled="disabled">Pause</button></li>
+				<li><button id="stop-btn" class="btn" onclick="stopTimer();" disabled="disabled">Stop</button></li>
+			</ul>
+			<ul class="timer-options">
+				<li>
+			  		<button value="pomodoro" onclick="changeOption(event);"><i class="icon-pomodoro"></i>Active Pomodoro</button>
+				</li>
+			</ul>
+
+			<!-- Audio playback -->
+			<audio id="alarm">
+			  <source src="/songs/alarm.ogg" type="audio/ogg" />
+			  <source src="/songs/alarm.mp3" type="audio/mp3" />
+			  Your browser does not support the audio tag.
+			</audio>
+
+		</div>
+
+		<div>
+			<p><center>
+				<div class="fb-like" data-href="http://tasktimer.bright.jit.su" data-send="true" data-layout="button_count" data-width="450" data-show-faces="false"></div>
+			</center></p>
+		</div>
+
+		<div id="fb-root"></div>
+
+		<script>(function(d, s, id) {
+		  var js, fjs = d.getElementsByTagName(s)[0];
+		  if (d.getElementById(id)) return;
+		  js = d.createElement(s); js.id = id;
+		  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=523993957617320";
+		  fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+		</script>
+
+	</body>
+	<footer></footer>
+
+
+	<!-- App View -->
+	<script type="text/javascript">
+
+		/* FLAGS */
+		var pomodoroFlag=false;
+
+		function setTimer(){
+			var labelHours = document.getElementById("hours"),
+				labelMinutes = document.getElementById("minutes"),
+				labelSeconds = document.getElementById("seconds");
+
+			labelHours.innerText = Hours + ' :';
+			labelMinutes.innerText = Minutes + ' :';
+			labelSeconds.innerText = Seconds;
+
+		}
+
+		function changeOption(event){
+			console.log(event);
+			switch(event.target.value){
+				case "pomodoro": {
+					if(pomodoroFlag === false){
+						//pomodoroInterval = setInterval(checkPomodoro,1000);
+						pomodoroFlag = true;
+						alert("Pomodoro was actived");
+						document.getElementsByClassName("timer-pomodoros")[0].style.visibility="visible";
+					}
+					else{
+						//clearInterval(pomodoroInterval);
+						pomodoroFlag = false;
+						alert("Pomodoro was deactived");
+						document.getElementsByClassName("timer-pomodoros")[0].style.visibility="hidden";
+					}
+					break;
+				}
+			}
+		}
+	</script>
+
+	<!-- Get Time -->
+	<script type="text/javascript">
+		var dateStart,
+			units = countdown.HOURS | countdown.MINUTES | countdown.SECONDS,
+			timer,
+			timerInterval;
+
+		var Hours=0, 
+			Minutes=0, 
+			Seconds=0;
+
+		var pauseSeconds,
+			pauseFlag=false;
+
+		var stopFlag=false;
+
+		var diffHours=0,
+			diffMinutes=0,
+			diffSeconds=0;
+
+		function runTimer(){
+
+			if(Hours === 0 && Minutes === 0 && Seconds === 0){
+				
+				timer = countdown(dateStart,null,units);
+
+				Hours = timer.hours; 
+				Minutes = timer.minutes; 
+				Seconds = timer.seconds;				
+			}
+		
+
+			if(pauseFlag === true){
+				pauseFlag = false;
+
+				var timeDiff = parseInt((pauseSeconds - dateStart)/1000);
+				dateStart.setSeconds(dateStart.getSeconds()-timeDiff);
+			
+				diffHours = Hours;
+				diffMinutes = Minutes;
+				diffSeconds = Seconds;
+
+			}
+
+			if(stopFlag === true){
+				stopFlag = false;
+				diffHours = diffMinutes = diffSeconds = 0;
+			}
+			
+			timer = countdown(dateStart,null,units);
+
+			Hours = timer.hours + diffHours; 
+			Minutes = timer.minutes + diffMinutes; 
+			Seconds = timer.seconds + diffSeconds;
+		
+			setTimer();
+
+			if(pomodoroFlag === true){
+				checkPomodoro();
+			}
+		}
+
+		function startTimer(){
+			event.target.disabled = true;
+			document.getElementById("pause-btn").disabled = false;
+			document.getElementById("stop-btn").disabled = false;
+			dateStart = new Date();
+			timerInterval = setInterval(runTimer,1000);
+		}
+
+		function pauseTimer(){
+			pauseSeconds = new Date();
+
+			pauseFlag = true;
+			document.getElementById("start-btn").disabled = false;
+			document.getElementById("stop-btn").disabled = false;
+			document.getElementById("pause-btn").disabled = true;
+
+			clearInterval(timerInterval);
+		}
+
+		function stopTimer(){
+
+			pauseFlag = false;
+			stopFlag = true;
+
+			document.getElementById("start-btn").disabled = false;
+			document.getElementById("pause-btn").disabled = true;
+			document.getElementById("stop-btn").disabled = true;
+
+			clearInterval(timerInterval);
+		}
+		
+	</script>
+
+	<!-- Pomodoro -->
+	<script type="text/javascript">
+		var pomodoros = 0,
+			latestPomodoro=0;
+
+		function checkPomodoro(){
+			if(Minutes >= 25 && Minutes%25 === 0 && Minutes > latestPomodoro){
+				pomodoros+=1;
+
+				if(pomodoros%4 === 0){
+					latestPomodoro = Minutes;
+					document.getElementById("alarm").play();
+					alert("Pause for 25 to 30 minutes.");
+					pauseTimer();	//pause timer
+				}
+				else{
+					latestPomodoro = Minutes;
+					document.getElementById("alarm").play();
+					alert("Pause for 3 to 5 minutes.");
+					pauseTimer();	//pause timer
+				}
+		
+				document.getElementById("pomodoro-counter").innerText = String(pomodoros) + " pomodoro(s).";
+
+				console.log(Minutes);
+			}
+		}
+	</script>
+</html>
